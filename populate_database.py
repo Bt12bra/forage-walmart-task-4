@@ -119,3 +119,46 @@ def main():
             elif any(x in file_lower for x in ["spreadsheet1", "sheet1"]):
                 spreadsheet_1 = file
             elif any(x in file_lower for x in ["spreadsheet2", "sheet2"]):
+                spreadsheet_2 = file
+        
+        # Process Spreadsheet 0
+        if spreadsheet_0:
+            print(f"Processing Spreadsheet 0: {spreadsheet_0}")
+            df0 = read_spreadsheet(spreadsheet_0)
+            if df0 is not None:
+                df0_formatted = process_spreadsheet_0(df0)
+                insert_into_database(df0_formatted, db_name, table_name)
+            else:
+                print("Failed to process Spreadsheet 0.")
+        else:
+            print("Spreadsheet 0 not found.")
+        
+        # Process Spreadsheets 1 and 2
+        if spreadsheet_1 and spreadsheet_2:
+            print(f"Processing Spreadsheets 1 and 2: {spreadsheet_1}, {spreadsheet_2}")
+            df1 = read_spreadsheet(spreadsheet_1)
+            df2 = read_spreadsheet(spreadsheet_2)
+            if df1 is not None and df2 is not None:
+                df12_formatted = process_spreadsheets_1_and_2(df1, df2)
+                insert_into_database(df12_formatted, db_name, table_name)
+            else:
+                print("Failed to process Spreadsheets 1 or 2.")
+        else:
+            print(f"Spreadsheet 1 or 2 not found. Found: {spreadsheet_files}")
+        
+        # Verify database
+        try:
+            conn = sqlite3.connect(db_name)
+            query = f"SELECT * FROM {table_name} LIMIT 5"
+            result = pd.read_sql(query, conn)
+            print("Sample data from database:")
+            print(result)
+            conn.close()
+        except Exception as e:
+            print(f"Database verification error: {str(e)}")
+        
+    except Exception as e:
+        print(f"Main error: {str(e)}")
+
+if __name__ == "__main__":
+    main()
